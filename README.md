@@ -555,3 +555,238 @@ def plot_scores(scores):
     plt.show()
 ```
 We are using TensorFlow to make our program run faster with the GPU
+- #### <font color='skyblue'>Using Tensorflow:</font>
+```python
+#tf.config.experimental.set_visible_devices([], 'GPU')
+scores = get_similarity_scores(frames)
+plot_scores(scores)
+```
+![f1720369-d268-41f0-b334-f140b3fb3e77](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/35fbbf4e-9cf3-43a5-a103-855f3812f9ae)
+
+We can see that there are some similarity drops, let's try to look at the frames in this area:
+
+```python
+max_dist = np.argmax(scores[1:50])
+max_dist
+plt.imshow(frames_face[max_dist])
+```
+```shell
+<matplotlib.image.AxesImage at 0x7b3d04319d30>
+```
+![52e93fb9-56da-4c85-a3d0-bb76b1982baf](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/5d5c7b28-df72-4b74-9b71-0570a2477160)
+
+```python
+plt.imshow(frames_face[max_dist+5])
+```
+```shell
+<matplotlib.image.AxesImage at 0x7b3d042f81d0>
+```
+Let's compare similarity score with the original video (it is not among samples, I uploaded it in separate dataset):
+Open video and look at the first frame:
+```python
+visualize_frame('../input/deepfake-detection-challenge/test_videos/bkuzquigyt.mp4', meta, train = False)
+```
+![0d447826-3ce6-4637-8b6c-ccbf628c32cc](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/6ccb5a09-27d1-4e3d-be55-66eebb724146)
+
+The difference between real and fake is quite clear. Just look at the nose.
+Let's get the frames and plot the similarity scores:
+```python
+# get frames from the original video
+orig_frames = get_frames('../input/deepfake-detection-challenge/test_videos/bkuzquigyt.mp4')
+# plot similarity scores
+orig_scores = get_similarity_scores(orig_frames)
+plot_scores(orig_scores)
+```
+![fb0994ff-aae4-4698-81f7-49c391f85227](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/0c009d53-918e-465f-8c75-d7473ca3e37b)
+
+Plot similarity scores together:
+
+```python
+plt.figure(figsize=(12,7))
+plt.plot(scores, label = 'fake image', color='r')
+plt.plot(orig_scores, label = 'real image', color='g')
+plt.title('Similarity Scores (Real and Fake)')
+plt.show()
+```
+![8c48a105-b204-4c3c-aced-5924a3f0e3ff](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/3c0fd559-4030-4064-9657-06b9d9f82093)
+
+The similarity scores of the original image are almost identical __if we take the whole frames__. Image similarity could still work if taking only frames containing faces. But I should fix the face detection first.
+- #### <font color='skyblue'>Classification of the SSIM :</font>
+
+```python
+def classify(scores_list):
+    '''
+    INPUT :
+        takes liste of scores of the video
+    OUTPUT :
+        Type of the video
+    '''
+    median=(max(scores_list)-min(scores_list))/2
+    if  median<0.1:
+        if (min(scores_list))>0.92:
+            print("It's a real video !")
+        else:
+            print("It's a fake video !!")
+    else :
+        print("Maybe it's fake !")
+```
+- ### <font color='skyblue'>TEST:</font>
+---
+> **<font color="#00CCAA">videos in the test dataset :</font>**
+```python
+visualize_frame('../input/deepfake-detection-challenge/test_videos/ryxaqpfubf.mp4', meta, train = False)
+```
+![be8b087d-5534-4f77-85e4-61590e559fe6](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/148aa4fc-d61a-43e0-9d45-854a1b5f7bb5)
+
+```python
+# get frames from the real test video in our dataset
+real_frames = get_frames('../input/deepfake-detection-challenge/test_videos/ryxaqpfubf.mp4')
+# plot similarity scores
+real_scores = get_similarity_scores(real_frames)
+plot_scores(real_scores)
+```
+![cc4ea8a7-86f7-4596-a194-2a35ebe40e2a](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/5b2fc6eb-a79a-41fa-b7c2-094a65890b41)
+
+```python
+# check if it fake or real
+classify(real_scores)
+```
+```shell
+It's a real video !
+```
+```python
+visualize_frame("../input/deepfake-detection-challenge/test_videos/ahjnxtiamx.mp4",meta,train=False)
+```
+![4028b07f-705c-45cf-83f6-536eb2a5743f](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/134eb3eb-c84f-4609-9407-077f511a9981)
+
+```python
+# get frames from the fake test video in our dataset
+fake_frames = get_frames("../input/deepfake-detection-challenge/test_videos/ahjnxtiamx.mp4")
+# plot similarity scores
+fake_scores = get_similarity_scores(fake_frames)
+plot_scores(fake_scores)
+```
+![2e0d18f0-8fc7-4738-8e10-bb4ec0b56720](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/9145c8a1-544d-4565-a07e-0bf30bd06ec3)
+
+```python
+# check if it fake or real
+classify(fake_scores)
+```
+```shell
+It's a fake video !!
+```
+> **<font color="#00CCAA">Problem of the new deepfake methods :</font>** (released a weeks ago)
+```python
+visualize_frame("../input/fake-nizar/swapped-video.mp4",meta,train=False)
+```
+![f1c1678c-0d63-4230-b9f6-be6e699043c5](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/c87ac36a-3a13-4683-9435-d1014605bc64)
+
+```python
+# get frames from the fake test video in our dataset
+test_frames = get_frames('../input/fake-nizar/swapped-video.mp4')
+# plot similarity scores
+test_scores = get_similarity_scores(test_frames)
+plot_scores(test_scores)
+```
+![be6c2c58-7c63-4142-9b86-7be56e62156b](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/62f76eea-7dcd-48ab-ac33-c83bbb6d9f07)
+
+```python
+#Check if it's fake or real
+classify(test_scores)
+```
+```shell
+Maybe it's fake !
+```
+```python
+visualize_frame("../input/fake-nizar/video.mp4",meta,train=False)
+```
+![51283103-abc4-4d10-81b6-7dd2e948fe7e](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/115c452c-033b-41fc-ad14-b1932b67e788)
+
+```python
+# get frames from the real test video in our dataset
+test_frames2 = get_frames('../input/fake-nizar/video.mp4')
+# plot similarity scores
+test_scores2 = get_similarity_scores(test_frames2)
+plot_scores(test_scores2)
+```
+![6152ae47-b535-49ce-a1ed-fbdcad984db6](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/a2953ba7-8b46-4ff5-9845-a721ac74bcda)
+
+```python
+plt.figure(figsize=(12,7))
+plt.plot(test_scores, label = 'swaped video', color='blue')
+plt.plot(test_scores2, label = 'original video', color='red')
+plt.title('Difference between original and swaped video')
+plt.show()
+```
+![9356ce17-6720-4249-bd34-e4de456a4e6d](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/2039cc39-83cf-4e99-8023-34b22d642cf8)
+
+```python
+visualize_frame("../input/fake-nizar/fake.mp4",meta,train=False)
+```
+![cd196732-541a-4057-bb86-c96cbefbfb1c](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/309d5b64-4200-4c91-9521-3be85f655057)
+
+```python
+# get frames from the fake test video in our dataset
+test_frames3 = get_frames('../input/fake-nizar/fake.mp4')
+# plot similarity scores
+test_scores3 = get_similarity_scores(test_frames3)
+plot_scores(test_scores3)
+```
+![bb63bb3d-8287-4313-89c6-6688050bb8b1](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/c51d27cf-79b2-42ea-92de-0f9d7f91be52)
+
+```python
+#Check if it's fake or real
+classify(test_scores3)
+```
+```shell
+Maybe it's fake !
+```
+## Deepfake Research Papers
+
+1. [Unmasking DeepFakes with simple Features](https://arxiv.org/pdf/1911.00686v2.pdf): The method is based on a classical frequency domain analysis
+followed by a basic classifier. Compared to previous systems, which need to be fed with large amounts of labeled data, this
+approach showed very good results using only a few annotated training samples and even achieved good accuracies in fully
+unsupervised scenarios. [Github repo](https://github.com/cc-hpc-itwm/DeepFakeDetection)
+
+2. [FaceForensics++: Learning to Detect Manipulated Facial Images](https://arxiv.org/pdf/1901.08971v3.pdf): This paper
+examines the realism of state-of- the-art image manipulations, and how difficult it is to detect them, either automatically
+or by humans. [Github repo](https://github.com/ondyari/FaceForensics)
+
+3. [In Ictu Oculi: Exposing AI Generated Fake Face Videos by Detecting Eye Blinking](https://arxiv.org/pdf/1806.02877v2.pdf): Method is based on detection of eye blinking in the videos,
+which is a physiological signal that is not well presented in the synthesized fake videos. Method is tested over
+benchmarks of eye-blinking detection datasets and also show promising performance on detecting videos generated with DeepFake.
+[Github repo](https://github.com/danmohaha/WIFS2018_In_Ictu_Oculi)
+
+4. [USE OF A CAPSULE NETWORK TO DETECT FAKE IMAGES AND VIDEOS](https://arxiv.org/pdf/1910.12467v2.pdf): "Capsule-Forensics"
+method to detect fake images and videos. [Github repo](https://github.com/nii-yamagishilab/Capsule-Forensics-v2)
+
+5. [Exposing DeepFake Videos By Detecting Face Warping Artifacts](https://arxiv.org/pdf/1811.00656v3.pdf): Deep learning based
+method that can effectively distinguish AI-generated fake videos (referred to as DeepFake videos hereafter) from real videos.
+Method is based on the observations that current DeepFake algorithm can only generate images of limited resolutions, which
+need to be further warped to match the original faces in the source video. Such transforms leave distinctive artifacts in
+the resulting DeepFake videos, and we show that they can be effectively captured by convolutional neural networks (CNNs).
+[Github repo](https://github.com/danmohaha/CVPRW2019_Face_Artifacts)
+
+6. [Limits of Deepfake Detection: A Robust Estimation Viewpoint](https://arxiv.org/pdf/1905.03493v1.pdf): This work gives a
+generalizable statistical framework with guarantees on its reliability. In particular, we build on the information-theoretic
+study of authentication to cast deepfake detection as a hypothesis testing problem specifically for outputs of GANs,
+themselves viewed through a generalized robust statistics framework.
+
+## Conclusion
+
+In this notebook:
+* I loaded saparate frames of the videos and sequences of video frames.
+* I created some animation of fake videos.
+* I used Haar cascades for face detection and zoomed into real and fake faces.
+* I looked at the similarity between frames.
+
+Fake videos can be detected by:
+* Small missing details (nose, glasses, teeth),
+* Blurry contours of the face,
+* Flickering.
+
+
+
+
+
+
