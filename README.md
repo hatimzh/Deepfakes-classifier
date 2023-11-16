@@ -94,6 +94,7 @@ meta = pd.read_json(metadata).transpose()
 meta.head()
 ```
 | | label |	split |	original |
+|---|---|---|---|
 | aagfhgtpmv.mp4 |	FAKE |	train |	vudstovrck.mp4 |
 | aapnvogymq.mp4 |	FAKE	| train	| jdubbvfswz.mp4 |
 | abarnvbtwb.mp4 |	REAL	| train	| None |
