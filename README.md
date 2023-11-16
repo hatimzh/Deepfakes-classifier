@@ -238,7 +238,117 @@ def visualize_frame(filename, meta, train=True):
     plt.show()
 
 ```
+- #### <font color="skyblue">function use Haarcascade :</font>
 
+```python
+def visualize_frame_casc(filename, meta, train = True):
+    '''
+    Helper function to visualize the 1st frame of the video by filename and metadata
+    INPUT:
+        filename - video filename
+        meta - dataframe containing metadata.json
+        train - indicates that the video is among train samples and the label can be retrived from metadata
+    '''
+    # get the 1st frame of the video
+    image = get_frame(filename)
+
+    # Display the 1st frame of the video
+    fig, axs = plt.subplots(1,3, figsize=(20,7))
+    axs[0].imshow(image)
+    axs[0].axis('off')
+    axs[0].set_title('Original frame')
+
+    # Extract the face with haar cascades
+    face_cascade = cv2.CascadeClassifier('../input/haarcascades/haarcascade_frontalface_default.xml')
+
+    # run the detector
+    # the output here is an array of detections; the corners of each detection box
+    # if necessary, modify these parameters until you successfully identify every face in a given image
+    faces = face_cascade.detectMultiScale(image, 1.2, 3)
+
+    # make a copy of the original image to plot detections on
+    image_with_detections = image.copy()
+
+    # loop over the detected faces, mark the image where each face is found
+    for (x,y,w,h) in faces:
+        # draw a rectangle around each detected face
+        # you may also need to change the width of the rectangle drawn depending on image resolution
+        cv2.rectangle(image_with_detections,(x,y),(x+w,y+h),(255,0,0),3)
+
+    axs[1].imshow(image_with_detections)
+    axs[1].axis('off')
+    axs[1].set_title('Highlight faces')
+
+    # crop out the 1st face
+    crop_img = image.copy()
+    for (x,y,w,h) in faces:
+        crop_img = image[y:y+h, x:x+w]
+        break;
+
+    # plot the 1st face
+    axs[2].imshow(crop_img)
+    axs[2].axis('off')
+    axs[2].set_title('Zoom-in face')
+
+    if train:
+        plt.suptitle('Image {image} label: {label}'.format(image = filename.split('/')[-1], label=get_label(filename, meta)))
+    else:
+        plt.suptitle('Image {image}'.format(image = filename.split('/')[-1]))
+    plt.show()
+```
+```python
+visualize_frame(train_fns[0], meta)
+```
+![b2c3a991-1c6a-4eae-8590-b2d42d0a459f](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/ba3cfe8f-80c7-47db-a46f-e85b0f77078b)
+
+On this video the nose of the person is strange.
+
+```python
+visualize_frame(train_fns[4], meta)
+```
+![0bb52b54-faaa-464a-a6cd-778a7feb23ac](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/ae631565-3330-4a1d-88a0-31e42a9dba93)
+
+- #### <font color="skyblue">Haarcascad results :</font>
+
+```python
+visualize_frame_casc(train_fns[4], meta)
+```
+![79e5fdaf-a501-44a3-8987-d8185d64f189](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/8f24a25f-b8d0-4079-93b8-36b9adfd45de)
+
+The glasses of this don't look very realistic. There is also a strange rounded shape around the right eye of the lady. Strange white spot to the right of the mouth.
+
+```python
+visualize_frame(train_fns[8], meta)
+```
+![a23aaff2-9480-4c30-a55f-cbe57871d7e9](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/0c3096fb-bd62-4fb2-aa09-fee85e411397)
+
+- #### <font color="skyblue">Haarcascad results :</font>
+
+```python
+visualize_frame_casc(train_fns[8], meta)
+```
+![dddc4599-24b7-4953-bf49-2e7fbb2c719f](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/96cb0334-8a8c-41dd-9a73-5b2fbbe3a21b)
+
+The face of this person is so blurry.
+
+Let's also look at a couple of real images:
+
+```python
+visualize_frame('../input/deepfake-detection-challenge/train_sample_videos/afoovlsmtx.mp4', meta)
+```
+![547ce392-6dba-4eb2-9209-2f9e396f4569](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/8c314575-238e-4298-9645-24534723f8e9)
+
+- #### <font color="skyblue">Haarcascad results :</font>
+```python
+visualize_frame_casc('../input/deepfake-detection-challenge/train_sample_videos/afoovlsmtx.mp4', meta)
+```
+![3fb1f5f5-acbb-485a-a01b-da0f7208fafa](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/7fe66ed4-3e73-4fa0-9bfb-351ecf9b5f10)
+
+We can see that real faces have such details as:
+* actual teeth (not just one white blob);
+* glasses with reflections.
+
+These fakes are really nice! Only small details tell that those are not real.
 
 
 
