@@ -1,5 +1,6 @@
 # Deepfakes-classifier
 Recommendation of a method to classify real and fake videos.
+>**Note:** It's impossible to upload the notebook due of its size
  ## Introduction
 Today's technology allows us to do the incredible things such as creation of fake videos or images of real people, [deepfakes](https://en.wikipedia.org/wiki/Deepfake). Deepfakes [are going viral](https://www.creativebloq.com/features/deepfake-examples) and creating a lot of credibility and security concerns. That is why deepfake detection is a fast growing area of research (I put some of the papers related to deepfakes in the end of the notebook).
 
