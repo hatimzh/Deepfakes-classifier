@@ -93,7 +93,6 @@ And load the metadata:
 meta = pd.read_json(metadata).transpose()
 meta.head()
 ```
-```
 |   | label |	split |	original |
 |---|---|---|---|
 | aagfhgtpmv.mp4 |	FAKE |	train |	vudstovrck.mp4 |
@@ -101,7 +100,145 @@ meta.head()
 | abarnvbtwb.mp4 |	REAL	| train	| None |
 | abofeumbvv.mp4 |	FAKE	| train	| atvmxvwyns.mp4 |
 | abqwwspghj.mp4 |	FAKE	| train	| qzimuostzz.mp4 |
+
+In the metadata we have a reference to the original video, but those videos can't be found among the samples on Kaggle.
+
+You can find the original videos if you download the whole dataset.
+
+Analyze the number or fake and real samples:
+
+```python
+# Pie chart, where the slices will be ordered and plotted counter-clockwise:
+labels = 'FAKE', 'REAL'
+sizes = [meta[meta.label == 'FAKE'].label.count(), meta[meta.label == 'REAL'].label.count()]
+
+fig1, ax1 = plt.subplots(figsize=(10,7))
+ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
+        shadow=True, startangle=90, colors=['#f4d53f', '#02a1d8'])
+ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+plt.title('Labels', fontsize=16)
+
+plt.show()
 ```
+![ae5e6997-a1a4-4342-96ee-aa7c2f1cecf4](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/06f555ca-b577-4099-8ddd-990bf49ddcf6)
+
+__Only 19% of samples are real videos.__ I don't know if this is the same for the whole dataset.
+
+## Preview Videos and Zoom into Faces
+
+Let's start with looking at some frames of the videos and trying to look closer at the faces.
+we used [MTCNN](https://github.com/ipazc/mtcnn) to detect the areas containing the faces on the image.
+
+```python
+from mtcnn import MTCNN
+
+
+def get_frame(filename):
+    '''
+    Helper function to return the 1st frame of the video by filename
+    INPUT:
+        filename - the filename of the video
+    OUTPUT:
+        image - 1st frame of the video (RGB)
+    '''
+    # Playing video from file
+    cap = cv2.VideoCapture(filename)
+    ret, frame = cap.read()
+
+    # Our operations on the frame come here
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # When everything done, release the capture
+    cap.release()
+    cv2.destroyAllWindows()
+
+    return image
+
+def get_label(filename, meta):
+    '''
+    Helper function to get a label from the filepath.
+    INPUT:
+        filename - filename of the video
+        meta - dataframe containing metadata.json
+    OUTPUT:
+        label - label of the video 'FAKE' or 'REAL'
+    '''
+    video_id = filename.split('/')[-1]
+    return meta.loc[video_id].label
+
+def get_original_filename(filename, meta):
+    '''
+    Helper function to get the filename of the original image
+    INPUT:
+        filename - filename of the video
+        meta - dataframe containing metadata.json
+    OUTPUT:
+        original_filename - name of the original video
+    '''
+    video_id = filename.split('/')[-1]
+    original_id = meta.loc[video_id].original
+    original_filename = os.path.splitext(original_id)[0]
+    return original_filename
+
+
+
+def visualize_frame(filename, meta, train=True):
+    '''
+    Helper function to visualize the 1st frame of the video by filename and metadata
+    INPUT:
+        filename - video filename
+        meta - dataframe containing metadata.json
+        train - indicates that the video is among train samples and the label can be retrieved from metadata
+    '''
+    # Get the 1st frame of the video
+    image = get_frame(filename)
+
+    # Display the 1st frame of the video
+    fig, axs = plt.subplots(1, 3, figsize=(20, 7))
+    axs[0].imshow(image)
+    axs[0].axis('off')
+    axs[0].set_title('Original frame')
+
+    # Load the MTCNN face detector
+    detector = MTCNN()
+
+    # Detect faces in the image
+    faces = detector.detect_faces(image)
+
+    # Make a copy of the original image to plot detections on
+    image_with_detections = image.copy()
+
+    # Loop over the detected faces and mark the image where each face is found
+    for face in faces:
+        (x, y, w, h) = face['box']
+
+        # Draw a rectangle around each detected face
+        cv2.rectangle(image_with_detections, (x, y), (x+w, y+h), (255, 0, 0), 3)
+
+    axs[1].imshow(image_with_detections)
+    axs[1].axis('off')
+    axs[1].set_title('Highlight faces')
+
+    # Crop out the first detected face
+    if len(faces) > 0:
+        (x, y, w, h) = faces[0]['box']
+        crop_img = image[y:y+h, x:x+w]
+    else:
+        crop_img = image.copy()
+
+    # Plot the first detected face
+    axs[2].imshow(crop_img)
+    axs[2].axis('off')
+    axs[2].set_title('Zoom-in face')
+
+    if train:
+        plt.suptitle('Image {image} label: {label}'.format(image=filename.split('/')[-1], label=get_label(filename, meta)))
+    else:
+        plt.suptitle('Image {image}'.format(image=filename.split('/')[-1]))
+    plt.show()
+
+```
+
 
 
 
