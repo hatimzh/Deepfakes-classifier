@@ -27,4 +27,72 @@ Installing collected packages: mtcnn
 Successfully installed mtcnn-0.1.1
 Note: you may need to restart the kernel to use updated packages.
 ```
+- #### <font color='skyblue'>Import librairies that we need :</font>
+
+```python
+# This Python 3 environment comes with many helpful analytics libraries installed
+# It is defined by the kaggle/python docker image: https://github.com/kaggle/docker-python
+# For example, here's several helpful packages to load in
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+# Input data files are available in the "../input/" directory.
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+
+# import file utilities
+import os
+import glob
+
+# import charting
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation, ArtistAnimation
+%matplotlib inline
+
+from IPython.display import HTML
+
+# import computer vision
+import cv2
+from skimage.measure import compare_ssim
+```
+
+- #### <font color='skyblue'>Using The GPU :</font> to accelerate our code
+
+```python
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # Set GPU device index (e.g., 0, 1, 2, etc.)
+```
+## Load Data
+
+First of all, we need to declare the paths to train and test samples and metadata file:
+
+```python
+TEST_PATH = '../input/deepfake-detection-challenge/test_videos/'
+TRAIN_PATH = '../input/deepfake-detection-challenge/train_sample_videos/'
+
+metadata = '../input/deepfake-detection-challenge/train_sample_videos/metadata.json'
+```
+Look at the number of samples in test and train sets:
+
+```python
+# load the filenames for train videos
+train_fns = sorted(glob.glob(TRAIN_PATH + '*.mp4'))
+
+# load the filenames for test videos
+test_fns = sorted(glob.glob(TEST_PATH + '*.mp4'))
+
+print('There are {} samples in the train set.'.format(len(train_fns)))
+print('There are {} samples in the test set.'.format(len(test_fns)))
+```
+```shell
+# load the filenames for train videos
+train_fns = sorted(glob.glob(TRAIN_PATH + '*.mp4'))
+
+# load the filenames for test videos
+test_fns = sorted(glob.glob(TEST_PATH + '*.mp4'))
+
+print('There are {} samples in the train set.'.format(len(train_fns)))
+print('There are {} samples in the test set.'.format(len(test_fns)))
+```
+
+
 
