@@ -350,6 +350,208 @@ We can see that real faces have such details as:
 
 These fakes are really nice! Only small details tell that those are not real.
 
+## Preview Multiple Frames
+
+Let's look at multiple frames:
+
+```python
+import math
+def get_frames(filename):
+    '''
+    Get all frames from the video
+    INPUT:
+        filename - video filename
+    OUTPUT:
+        frames - the array of video frames
+    '''
+    frames = []
+    cap = cv2.VideoCapture(filename)
+
+    while(cap.isOpened()):
+        ret, frame = cap.read()
+
+        if not ret:
+            break;
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frames.append(image)
+
+    cap.release()
+    return frames
+
+def create_animation(filename):
+    '''
+    Function to plot the animation with matplotlib
+    INPUT:
+        filename - filename of the video
+    '''
+    fig = plt.figure(figsize=(10,7))
+    frames = get_frames(filename)
+
+    ims = []
+    for frame in frames:
+        im = plt.imshow(frame, animated=True)
+        ims.append([im])
+
+    animation = ArtistAnimation(fig, ims, interval=30, repeat_delay=1000)
+    plt.show()
+    return animation
+
+def visualize_several_frames(frames, step=100, cols = 3, title=''):
+    '''
+    Function to visualize the frames from the video
+    INPUT:
+        filename - filename of the video
+        step - the step between the video frames to visualize
+        cols - number of columns of frame grid
+    '''
+    n_frames = len(range(0, len(frames), step))
+    rows = n_frames // cols
+    if n_frames % cols > 0:
+        rows = rows + 1
+
+    fig, axs = plt.subplots(rows, cols, figsize=(20,20))
+    for i in range(0, n_frames):
+        frame = frames[i]
+
+        r = i // cols
+        c = i % cols
+
+        axs[r,c].imshow(frame)
+        axs[r,c].axis('off')
+        axs[r,c].set_title(str(i))
+
+    plt.suptitle(title)
+    plt.show()
+```
+```python
+frames = get_frames(train_fns[0])
+visualize_several_frames(frames, step=50, cols = 2, title=train_fns[0].split('/')[-1])
+```
+![ab1fd075-dc5d-4f1b-86f3-7abf38a31e24](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/3ecd5184-7b4e-4321-99dd-fc05e49af308)
+
+Static images don't look so bad, but if we look at the video (use the code for animation: `create_animation` function above) we see a lot of artifacts, which tell us that the video is fake.
+
+Now let's look closer at the person's face in motion:
+
+> Some technics to free RAM memory
+
+```python
+import gc
+gc.collect()
+```
+```shell
+25762
+```
+```python
+del train_fns
+del test_fns
+```
+```python
+import matplotlib.animation as animation
+def get_frames_zoomed(filename):
+    '''
+    Get all frames from the video zoomed into the face
+    INPUT:
+        filename - video filename
+    OUTPUT:
+        frames - the array of video frames
+    '''
+    frames = []
+    cap = cv2.VideoCapture(filename)
+
+    if not cap.isOpened():
+        print(f"Error opening video file {filename}")
+        return None
+
+    face_cascade = cv2.CascadeClassifier('../input/haarcascades/haarcascade_frontalface_default.xml')
+
+    while True:
+        ret, frame = cap.read()
+
+        if not ret:
+            break;
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        faces = face_cascade.detectMultiScale(image, 1.2, 3)
+        if len(faces) > 0:
+            (x, y, w, h) = faces[0]
+            crop_img = image[y:y+h, x:x+w]
+            frames.append(crop_img)
+
+    cap.release()
+    return frames
+
+def create_animation_zoomed(filename):
+    '''
+    Function to create the animated cropped faces out of the video
+    INPUT:
+        filename - filename of the video
+    '''
+    fig, ax = plt.subplots(1,1, figsize=(10,7))
+    frames = get_frames_zoomed(filename)
+
+    def update(frame_number):
+        plt.axis('off')
+        plt.imshow(frames[frame_number])
+
+    animation_obj = animation.FuncAnimation(fig, update, frames=len(frames), interval=30, repeat=True)
+    return animation_obj
+```
+```python
+animation = create_animation_zoomed(train_fns[0])
+HTML(animation.to_jshtml())
+```
+![download](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/19d5eacb-16bd-4781-92cc-8a504bdf5eb2)
+
+![7a4bb456-2fd7-441f-9ed1-3b6640736ca4](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/121f94a0-d3db-4015-82b3-bb5bb32c4d60)
+
+We clearly see that the video is fake looking closer at the face! Some frames are really creepy. And there is flickering.
+
+```python
+# visualize the zoomed in frames
+frames_face = get_frames_zoomed(train_fns[0])
+visualize_several_frames(frames_face, step=55, cols = 2, title=train_fns[0].split('/')[-1])
+```
+![c8c7e3fb-4cf9-442e-8341-55b8f5ab2648](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/730ec9df-759a-4c64-97df-3392ffa7bcb6)
+
+Individual frames don't look too bad. This means that we have to build models using maximum frames, we can't just sample some frames. But we can use only frames containing faces to train the model.
+
+## Explore the Similarity between Frames
+
+```python
+
+import tensorflow as tf
+
+def get_similarity_scores(frames):
+    '''
+    Get the list of similarity scores between the frames.
+    '''
+    scores = []
+    for i in range(1, len(frames)):
+        frame = frames[i]
+        prev_frame = frames[i-1]
+
+        # Convert the frames to tensors
+        frame = tf.convert_to_tensor(frame)
+        prev_frame = tf.convert_to_tensor(prev_frame)
+
+        # Calculate the SSIM score between the frames
+        score = tf.image.ssim(frame, prev_frame, max_val=255)
+        scores.append(score)
+    return scores
 
 
-
+def plot_scores(scores):
+    '''
+    Plot the similarity scores
+    '''
+    plt.figure(figsize=(12,7))
+    plt.plot(scores)
+    plt.title('Similarity Scores')
+    plt.xlabel('Frame Number')
+    plt.ylabel('Similarity Score')
+    plt.show()
+```
+We are using TensorFlow to make our program run faster with the GPU
