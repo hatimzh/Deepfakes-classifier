@@ -93,12 +93,13 @@ And load the metadata:
 meta = pd.read_json(metadata).transpose()
 meta.head()
 ```
-| | label |	split |	original |
+|   | label |	split |	original |
 |---|---|---|---|
 | aagfhgtpmv.mp4 |	FAKE |	train |	vudstovrck.mp4 |
 | aapnvogymq.mp4 |	FAKE	| train	| jdubbvfswz.mp4 |
 | abarnvbtwb.mp4 |	REAL	| train	| None |
 | abofeumbvv.mp4 |	FAKE	| train	| atvmxvwyns.mp4 |
 | abqwwspghj.mp4 |	FAKE	| train	| qzimuostzz.mp4 |
+
 
 
