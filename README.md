@@ -84,15 +84,20 @@ print('There are {} samples in the train set.'.format(len(train_fns)))
 print('There are {} samples in the test set.'.format(len(test_fns)))
 ```
 ```shell
-# load the filenames for train videos
-train_fns = sorted(glob.glob(TRAIN_PATH + '*.mp4'))
-
-# load the filenames for test videos
-test_fns = sorted(glob.glob(TEST_PATH + '*.mp4'))
-
-print('There are {} samples in the train set.'.format(len(train_fns)))
-print('There are {} samples in the test set.'.format(len(test_fns)))
+There are 400 samples in the train set.
+There are 400 samples in the test set.
 ```
+And load the metadata:
 
+```python
+meta = pd.read_json(metadata).transpose()
+meta.head()
+```
+| | label |	split |	original |
+| aagfhgtpmv.mp4 |	FAKE |	train |	vudstovrck.mp4 |
+| aapnvogymq.mp4 |	FAKE	| train	| jdubbvfswz.mp4 |
+| abarnvbtwb.mp4 |	REAL	| train	| None |
+| abofeumbvv.mp4 |	FAKE	| train	| atvmxvwyns.mp4 |
+| abqwwspghj.mp4 |	FAKE	| train	| qzimuostzz.mp4 |
 
 
