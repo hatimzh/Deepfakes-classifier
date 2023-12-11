@@ -39,7 +39,7 @@ Note: you may need to restart the kernel to use updated packages.
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 
-# Input data files are available in the "../input/" directory.
+# Input data files are available in the "./input/" directory.
 # For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
 
 # import file utilities
@@ -68,10 +68,10 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # Set GPU device index (e.g., 0, 1, 2,
 First of all, we need to declare the paths to train and test samples and metadata file:
 
 ```python
-TEST_PATH = '../input/deepfake-detection-challenge/test_videos/'
-TRAIN_PATH = '../input/deepfake-detection-challenge/train_sample_videos/'
+TEST_PATH = './input/deepfake-detection-challenge/test_videos/'
+TRAIN_PATH = './input/deepfake-detection-challenge/train_sample_videos/'
 
-metadata = '../input/deepfake-detection-challenge/train_sample_videos/metadata.json'
+metadata = './input/deepfake-detection-challenge/train_sample_videos/metadata.json'
 ```
 Look at the number of samples in test and train sets:
 
@@ -261,7 +261,7 @@ def visualize_frame_casc(filename, meta, train = True):
     axs[0].set_title('Original frame')
 
     # Extract the face with haar cascades
-    face_cascade = cv2.CascadeClassifier('../input/haarcascades/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('./input/haarcascades/haarcascade_frontalface_default.xml')
 
     # run the detector
     # the output here is an array of detections; the corners of each detection box
@@ -336,13 +336,13 @@ The face of this person is so blurry.
 Let's also look at a couple of real images:
 
 ```python
-visualize_frame('../input/deepfake-detection-challenge/train_sample_videos/afoovlsmtx.mp4', meta)
+visualize_frame('./input/deepfake-detection-challenge/train_sample_videos/afoovlsmtx.mp4', meta)
 ```
 ![547ce392-6dba-4eb2-9209-2f9e396f4569](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/8c314575-238e-4298-9645-24534723f8e9)
 
 - #### <font color="skyblue">Haarcascad results :</font>
 ```python
-visualize_frame_casc('../input/deepfake-detection-challenge/train_sample_videos/afoovlsmtx.mp4', meta)
+visualize_frame_casc('./input/deepfake-detection-challenge/train_sample_videos/afoovlsmtx.mp4', meta)
 ```
 ![3fb1f5f5-acbb-485a-a01b-da0f7208fafa](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/7fe66ed4-3e73-4fa0-9bfb-351ecf9b5f10)
 
@@ -466,7 +466,7 @@ def get_frames_zoomed(filename):
         print(f"Error opening video file {filename}")
         return None
 
-    face_cascade = cv2.CascadeClassifier('../input/haarcascades/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('./input/haarcascades/haarcascade_frontalface_default.xml')
 
     while True:
         ret, frame = cap.read()
@@ -586,7 +586,7 @@ plt.imshow(frames_face[max_dist+5])
 Let's compare similarity score with the original video (it is not among samples, I uploaded it in separate dataset):
 Open video and look at the first frame:
 ```python
-visualize_frame('../input/deepfake-detection-challenge/test_videos/bkuzquigyt.mp4', meta, train = False)
+visualize_frame('./input/deepfake-detection-challenge/test_videos/bkuzquigyt.mp4', meta, train = False)
 ```
 ![0d447826-3ce6-4637-8b6c-ccbf628c32cc](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/6ccb5a09-27d1-4e3d-be55-66eebb724146)
 
@@ -594,7 +594,7 @@ The difference between real and fake is quite clear. Just look at the nose.
 Let's get the frames and plot the similarity scores:
 ```python
 # get frames from the original video
-orig_frames = get_frames('../input/deepfake-detection-challenge/test_videos/bkuzquigyt.mp4')
+orig_frames = get_frames('./input/deepfake-detection-challenge/test_videos/bkuzquigyt.mp4')
 # plot similarity scores
 orig_scores = get_similarity_scores(orig_frames)
 plot_scores(orig_scores)
@@ -636,13 +636,13 @@ def classify(scores_list):
 ---
 > **<font color="#00CCAA">videos in the test dataset :</font>**
 ```python
-visualize_frame('../input/deepfake-detection-challenge/test_videos/ryxaqpfubf.mp4', meta, train = False)
+visualize_frame('./input/deepfake-detection-challenge/test_videos/ryxaqpfubf.mp4', meta, train = False)
 ```
 ![be8b087d-5534-4f77-85e4-61590e559fe6](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/148aa4fc-d61a-43e0-9d45-854a1b5f7bb5)
 
 ```python
 # get frames from the real test video in our dataset
-real_frames = get_frames('../input/deepfake-detection-challenge/test_videos/ryxaqpfubf.mp4')
+real_frames = get_frames('./input/deepfake-detection-challenge/test_videos/ryxaqpfubf.mp4')
 # plot similarity scores
 real_scores = get_similarity_scores(real_frames)
 plot_scores(real_scores)
@@ -657,13 +657,13 @@ classify(real_scores)
 It's a real video !
 ```
 ```python
-visualize_frame("../input/deepfake-detection-challenge/test_videos/ahjnxtiamx.mp4",meta,train=False)
+visualize_frame("./input/deepfake-detection-challenge/test_videos/ahjnxtiamx.mp4",meta,train=False)
 ```
 ![4028b07f-705c-45cf-83f6-536eb2a5743f](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/134eb3eb-c84f-4609-9407-077f511a9981)
 
 ```python
 # get frames from the fake test video in our dataset
-fake_frames = get_frames("../input/deepfake-detection-challenge/test_videos/ahjnxtiamx.mp4")
+fake_frames = get_frames("./input/deepfake-detection-challenge/test_videos/ahjnxtiamx.mp4")
 # plot similarity scores
 fake_scores = get_similarity_scores(fake_frames)
 plot_scores(fake_scores)
@@ -679,13 +679,13 @@ It's a fake video !!
 ```
 > **<font color="#00CCAA">Problem of the new deepfake methods :</font>** (released a weeks ago)
 ```python
-visualize_frame("../input/fake-nizar/swapped-video.mp4",meta,train=False)
+visualize_frame("./input/fake-nizar/swapped-video.mp4",meta,train=False)
 ```
 ![f1c1678c-0d63-4230-b9f6-be6e699043c5](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/c87ac36a-3a13-4683-9435-d1014605bc64)
 
 ```python
 # get frames from the fake test video in our dataset
-test_frames = get_frames('../input/fake-nizar/swapped-video.mp4')
+test_frames = get_frames('./input/fake-nizar/swapped-video.mp4')
 # plot similarity scores
 test_scores = get_similarity_scores(test_frames)
 plot_scores(test_scores)
@@ -700,13 +700,13 @@ classify(test_scores)
 Maybe it's fake !
 ```
 ```python
-visualize_frame("../input/fake-nizar/video.mp4",meta,train=False)
+visualize_frame("./input/fake-nizar/video.mp4",meta,train=False)
 ```
 ![51283103-abc4-4d10-81b6-7dd2e948fe7e](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/115c452c-033b-41fc-ad14-b1932b67e788)
 
 ```python
 # get frames from the real test video in our dataset
-test_frames2 = get_frames('../input/fake-nizar/video.mp4')
+test_frames2 = get_frames('./input/fake-nizar/video.mp4')
 # plot similarity scores
 test_scores2 = get_similarity_scores(test_frames2)
 plot_scores(test_scores2)
@@ -723,13 +723,13 @@ plt.show()
 ![9356ce17-6720-4249-bd34-e4de456a4e6d](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/2039cc39-83cf-4e99-8023-34b22d642cf8)
 
 ```python
-visualize_frame("../input/fake-nizar/fake.mp4",meta,train=False)
+visualize_frame("./input/fake-nizar/fake.mp4",meta,train=False)
 ```
 ![cd196732-541a-4057-bb86-c96cbefbfb1c](https://github.com/hatimzh/Deepfakes-classifier/assets/96501113/309d5b64-4200-4c91-9521-3be85f655057)
 
 ```python
 # get frames from the fake test video in our dataset
-test_frames3 = get_frames('../input/fake-nizar/fake.mp4')
+test_frames3 = get_frames('./input/fake-nizar/fake.mp4')
 # plot similarity scores
 test_scores3 = get_similarity_scores(test_frames3)
 plot_scores(test_scores3)
