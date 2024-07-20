@@ -1,1 +1,3 @@
 *.mp4
+./input/fakes/*.mp4
+./input/fake-nizar/*.mp4
