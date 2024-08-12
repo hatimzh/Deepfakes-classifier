@@ -1,5 +1,2 @@
 *.mp4
-#./input/fakes/*.mp4
-#./input/fake-nizar/*.mp4
-/Deepfakes-classifier/input/fake-nizar/*.mp4
 
